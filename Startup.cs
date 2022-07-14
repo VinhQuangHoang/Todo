@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Todolist.Entities;
+using Todolist.Service;
 
 namespace Todolist
 {
@@ -22,6 +23,8 @@ namespace Todolist
         {
             services.AddDbContext<TodoDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DPContext")));
             services.AddDatabaseDeveloperPageExceptionFilter();
+
+            services.AddScoped<ITodoService, TodoService>();
 
             services.AddControllersWithViews();
         }
