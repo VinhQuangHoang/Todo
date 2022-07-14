@@ -1,0 +1,30 @@
+﻿@model List<TodoViewModel>
+@{
+    ViewData["Title"] = "Todo List";
+}
+
+<div class="container-fluid">
+    <h1 class="display-4">Todo list</h1>
+    <div class="col-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Desciption</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var index = 1;}
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <th scope="row">@(index++)</th>
+                        <td>@item.Title</td>
+                        <td>@item.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
