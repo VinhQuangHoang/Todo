@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Todolist.Entities;
 using Todolist.Models;
+using Todolist.Service;
 
 namespace Todolist.Controllers
 {
@@ -12,11 +13,13 @@ namespace Todolist.Controllers
     {
         private readonly ILogger<TodoController> _logger;
         private readonly TodoDbContext _context;
+        private readonly ITodoService _todoService;
 
-        public TodoController(ILogger<TodoController> logger, TodoDbContext context)
+        public TodoController(ILogger<TodoController> logger, TodoDbContext context, ITodoService todoService)
         {
             _logger = logger;
             _context = context;
+            _todoService = todoService;
         }
 
         [HttpGet]
@@ -84,6 +87,13 @@ namespace Todolist.Controllers
             return Json(false);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _todoService.Delete(id);
+
+            return Json(result);
+        }
 
     }
 }
