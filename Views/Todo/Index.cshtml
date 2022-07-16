@@ -1,7 +1,23 @@
-﻿@model List<TodoViewModel>
+﻿@model PaginatedList<Todo>
+@*@model List<Todo>*@
+
 @{
     ViewData["Title"] = "Todo List";
 }
+
+<p>
+    @Html.ActionLink("Create New", "AjaxCreate")
+</p>
+
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
 
 <div class="container-fluid">
     <h1 class="display-4">Todo list</h1>
@@ -10,29 +26,54 @@
             <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Desciption</th>
+                    <th scope="col" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Title</th>
+                    <th scope="col" asp-route-sortOrder="@ViewData["DescriptionSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Desciption</th>
                 </tr>
             </thead>
             <tbody>
                 @{ var index = 1;}
                 @foreach (var item in Model)
                 {
-                    <tr>
-                        <th scope="row">@(index++)</th>
-                        <td>@item.Title</td>
-                        <td>@item.Description</td>
-                        <td>
-                            <a href="#" data-id="@item.Id" class="btn btn-danger js-btn-delete" role="button" aria-pressed="true">
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
+                <tr>
+                    <th scope="row">@(index++)</th>
+                    <td>@item.Title</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <a href="#" data-id="@item.Id" class="btn btn-danger js-btn-update" role="button" aria-pressed="true">
+                            Update
+                        </a>
+                    </td>
+                    <td>
+                        <a href="#" data-id="@item.Id" class="btn btn-danger js-btn-delete" role="button" aria-pressed="true">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-page="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-page="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
 
 @section Scripts {
     <script type="text/javascript">
