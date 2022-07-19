@@ -7,6 +7,7 @@ using Todolist.Entities;
 using Todolist.Models;
 using Todolist.Service;
 using System;
+using System.Collections.Generic;
 
 namespace Todolist.Controllers
 {
@@ -23,58 +24,44 @@ namespace Todolist.Controllers
             _todoService = todoService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? page)
+        //[HttpGet]
+        public IActionResult Index(int pg = 1, string SearchText = "")
         {
-            var todos = await _context.Todos.AsNoTracking().Select(e => new Todo
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Description = e.Description
-            }).ToListAsync();
+            //var todo = await _context.Todos.AsNoTracking().Select(e => new Todo
+            //{
+            //    Id = e.Id,
+            //    Title = e.Title,
+            //    Description = e.Description
+            //}).ToListAsync();
 
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "tiltle_name" : "";
-            ViewData["DescriptionSortParm"] = String.IsNullOrEmpty(sortOrder) ? "description_name" : "";
+            List<Todo> todos;
 
-            if (searchString != null)
+            if (SearchText != "")
             {
-                page = 1;
+                todos = _context.Todos
+                    .Where(x => x.Title.Contains(SearchText) || x.Description.Contains(SearchText))
+                    .ToList();
             }
             else
-            {
-                searchString = currentFilter;
-            }
+                todos = _context.Todos.ToList();
 
-            ViewData["CurrentFilter"] = searchString;
+            const int pageSize = 3;
+            if (pg < 1)
+                pg = 1;
 
-            var title = from s in _context.Todos
-                        select s;
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                title = title.Where(s => s.Title.Contains(searchString)
-                                       || s.Description.Contains(searchString));
-            }
-            switch (sortOrder)
-            {
-                case "tiltle_name":
-                    title = title.OrderByDescending(s => s.Title);
-                    break;
-                case "description_name":
-                    title = title.OrderByDescending(s => s.Description);
-                    break;
-                default:
-                    title = title.OrderBy(s => s.Title);
-                    break;
-            }
+            int resCount = todos.Count();
 
-            //return View(todos);
-            int pageSize = 3;
-            return View(await PaginatedList<Todo>.CreateAsync(title.AsNoTracking(), page ?? 1, pageSize));
+            var pager = new Pager(resCount, pg, pageSize);
+            int resSkip = (pg - 1) * pageSize;
 
-            //return View();
+            var data = todos.Skip(resSkip).Take(pager.PageSize).ToList();
+            this.ViewBag.Pager = pager;
 
+
+            return View(data);
         }
+
+
 
         [HttpGet]
         public IActionResult Create()
