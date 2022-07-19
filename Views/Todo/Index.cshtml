@@ -1,10 +1,34 @@
-﻿@model List<TodoViewModel>
+﻿@model List<Todo>
 @{
     ViewData["Title"] = "Todo List";
+
+    Pager pager = new Pager();
+
+    int pageNo = 0;
+    if(ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
 }
+<h1 class="display-4">Todo list</h1>
+<p>
+    @Html.ActionLink("Create New", "AjaxCreate")
+</p>
+
+<form asp-controller="Todo" asp-action="Index">
+    <div class="form-actions no-color">
+        <p>
+            Find by name: <input type="text" name="SearchText" value="@ViewBag.SearchText" placeholder="Search key" />
+            <input type="submit" value="Search" class="p-1 ml-2 btn btn-sm btn-info" /> |
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
 
 <div class="container-fluid">
-    <h1 class="display-4">Todo list</h1>
+    
+    
     <div class="col-12">
         <table class="table table-striped" id="js-todo-table">
             <thead>
@@ -22,6 +46,11 @@
                         <th scope="row">@(index++)</th>
                         <td>@item.Title</td>
                         <td>@item.Description</td>
+                        @*<td>
+                            <a href="#" data-id="@item.Id" class="btn btn-danger js-btn-update" role="button" aria-pressed="true">
+                                Update
+                            </a>
+                        </td>*@
                         <td>
                             <a href="#" data-id="@item.Id" class="btn btn-danger js-btn-delete" role="button" aria-pressed="true">
                                 Delete
@@ -32,6 +61,43 @@
             </tbody>
         </table>
     </div>
+</div>
+<div class="container">
+    @if (pager.TotalPages > 0) 
+    {
+        <ul class="pagination justify-content-end">
+            @if(pager.CurrentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Todo" asp-action="Index" asp-route-pg="1"> First </a>
+                </li>
+                <li  class="page-item">
+                    <a class="page-link" asp-controller="Todo" asp-action="Index" asp-route-pg="@(pager.CurrentPage - 1)"> Previous </a>
+                </li>
+            }
+
+
+            @for(var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+            {
+                <li class="page-item @(pge == pager.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-controller="Todo" asp-action="Index" asp-route-pg="@pge"> @pge </a>
+                </li>
+            }
+
+
+
+            @if(pager.CurrentPage < pager.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="Todo" asp-action="Index" asp-route-pg="@(pager.CurrentPage + 1)"> Next </a>
+                </li>
+                <li  class="page-item">
+                    <a class="page-link" asp-controller="Todo" asp-action="Index" asp-route-pg="@(pager.TotalPages)"> Last </a>
+                </li>
+            }
+      </ul>
+    }
+
 </div>
 
 @section Scripts {

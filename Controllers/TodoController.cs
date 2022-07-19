@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Todolist.Entities;
 using Todolist.Models;
 using Todolist.Service;
+using System;
+using System.Collections.Generic;
 
 namespace Todolist.Controllers
 {
@@ -22,18 +24,44 @@ namespace Todolist.Controllers
             _todoService = todoService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index()
+        //[HttpGet]
+        public IActionResult Index(int pg = 1, string SearchText = "")
         {
-            var todos = await _context.Todos.AsNoTracking().Select(e => new TodoViewModel
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Description = e.Description
-            }).ToListAsync();
+            //var todo = await _context.Todos.AsNoTracking().Select(e => new Todo
+            //{
+            //    Id = e.Id,
+            //    Title = e.Title,
+            //    Description = e.Description
+            //}).ToListAsync();
 
-            return View(todos);
+            List<Todo> todos;
+
+            if (SearchText != "")
+            {
+                todos = _context.Todos
+                    .Where(x => x.Title.Contains(SearchText) || x.Description.Contains(SearchText))
+                    .ToList();
+            }
+            else
+                todos = _context.Todos.ToList();
+
+            const int pageSize = 3;
+            if (pg < 1)
+                pg = 1;
+
+            int resCount = todos.Count();
+
+            var pager = new Pager(resCount, pg, pageSize);
+            int resSkip = (pg - 1) * pageSize;
+
+            var data = todos.Skip(resSkip).Take(pager.PageSize).ToList();
+            this.ViewBag.Pager = pager;
+
+
+            return View(data);
         }
+
+
 
         [HttpGet]
         public IActionResult Create()
